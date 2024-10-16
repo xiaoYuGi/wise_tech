@@ -50,7 +50,7 @@ LTRIM(str)         --从字符串str中切掉开头的空格 
 POSITION(substr,str)  
                    --返回子串substr在字符串str中第一次出现的位置 
 QUOTE(str)         --用反斜杠转义str中的单引号 
-REPEAT(str,srchstr,rplcstr) 
+REPEAT(str, x) 
                    --返回字符串str重复x次的结果 
 REVERSE(str)       --返回颠倒字符串str的结果 
 RIGHT(str,x)       --返回字符串str中最右边的x个字符 
