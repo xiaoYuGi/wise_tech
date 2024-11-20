@@ -33,6 +33,7 @@ void init(int[][] edges) {
     idx = 0;
     Arrays.fill(h, -1);
     for (int[] edge : edges) {
+        // 建图的时候，如果是无向图，一定要每个节点的边都写入
         add(edge[0], edge[1]);
         add(edge[1], edge[0]);
     }
