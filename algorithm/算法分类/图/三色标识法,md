@@ -1,0 +1,140 @@
+
+
+### lc_207  课程表
+https://leetcode.cn/problems/course-schedule/description/
+
+题意给出一个有向图，按照题意要求，是求出当前图中是否存在环。
+
+> 要点： 有向图和无向图如何求出其中是否存在环？ 有向图或者无向图求环的区别是什么？
+
+本题使用了两种思路：<br/>
+1. 由于是有向图，可以使用拓扑排序的方式，进行遍历，如果能够进行遍历的节点个数小于实际图中节点的个数，那么说明当前图中存在环；
+2. 使用`三色标记法` 进行递归遍历图，一旦发现节点已经被访问过，那么可以确定是找到了环；
+
+
+#### 解法一： 拓扑排序
+```java
+    /**
+     * 拓扑排序法
+     */
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        ArrayList<Integer>[] arr = new ArrayList[numCourses];
+        Arrays.setAll(arr, ArrayList::new);
+
+        int[] in = new int[numCourses];
+        for (int[] prerequisite : prerequisites) {
+            int s = prerequisite[0];
+            int f = prerequisite[1];
+
+            arr[f].add(s);
+            in[s]++;
+        }
+
+        Queue<Integer> queue = new ArrayDeque<>();
+        for (int i = 0; i < numCourses; i++) if (in[i] == 0) queue.offer(i);
+
+        if (queue.isEmpty()) return false;
+        int cnt = 0;
+        while (!queue.isEmpty()) {
+            Integer cur = queue.poll();
+            ++cnt;
+            for (Integer next : arr[cur]) {
+                in[next]--;
+                // 入度为0的时候，才能进入队列
+                if (in[next] == 0) {
+                    queue.offer(next);
+                }
+            }
+        }
+
+        return cnt == numCourses;
+    }
+```
+
+### 三色标记法
+
+1. 矩阵建图
+```java
+    /**
+     * 使用三色标记法进行运算 
+     */
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        ArrayList<Integer>[] g = new ArrayList[numCourses];
+        Arrays.setAll(g, ArrayList::new);
+        for (int[] prerequisite : prerequisites) {
+            g[prerequisite[1]].add(prerequisite[0]);
+        }
+
+        int[] color = new int[numCourses];
+        for (int i = 0; i < numCourses; i++) {
+            if (color[i] == 0 && dfs(i, g, color)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    boolean dfs(int u, ArrayList<Integer>[] g, int[] color) {
+        color[u] = 1;
+        for (Integer v : g[u]) {
+            if (color[v] == 1 || color[v] == 0 && dfs(v, g, color)) {
+                return true;
+            }
+        }
+        color[u] = 2;
+        return false;
+    }
+```
+
+2. 链式前向星建图
+> 链式前向星建图方式可以节约内存，不论是时间性能还是空间性能都有比较大的优势，因此在建图是优先考虑这种建图方式。
+```java
+    final int N = 2010, M = 5010;
+    int[] h = new int[N];
+    int[] e = new int[M];
+    int[] ne = new int[M];
+
+    int idx;
+
+
+    void add(int u, int v) {
+        e[idx] = v;
+        ne[idx] = h[u];
+        h[u] = idx++;
+    }
+
+    /**
+     * 三色标记法二（链式前向星建图）
+     */
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        idx = 0;
+        Arrays.fill(h,-1);
+        for (int[] prerequisite : prerequisites) {
+            add(prerequisite[1], prerequisite[0]);
+        }
+
+        int[] color = new int[numCourses];
+        for (int u = 0; u < numCourses; u++) {
+            // 当前点 u 可能会在前次的dfs中访问过，状态不为0, 这种节点不需要再次访问
+            if (color[u] == 0 && dfs(u,color)) {
+                return false;
+            }
+        }
+        // 默认无环，可以满足课程学习
+        return true;
+    }
+
+
+    boolean dfs(int u, int[] color) {
+        color[u] = 1;
+        for(int nextIdx = h[u]; nextIdx != -1; nextIdx = ne[nextIdx]) {
+            int v = e[nextIdx];
+            if (color[v] == 1 || color[v] == 0 && dfs(v, color)) {
+                return true;
+            }
+        }
+        color[u] = 2;
+        return false;
+    }
+
+```
