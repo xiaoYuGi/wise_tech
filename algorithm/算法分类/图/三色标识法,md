@@ -140,3 +140,89 @@ https://leetcode.cn/problems/course-schedule/description/
     }
 
 ```
+
+
+
+
+### lc_802
+https://leetcode.cn/problems/find-eventual-safe-states/
+
+本题相对于207题来说是要更难一点，此题中需要理解题意的是：`如果一个节点没有连出的有向边，则该节点是 终端节点 。如果从该节点开始的所有可能路径都通向 终端节点 ，则该节点为 安全节点 。`
+
+原图中，`出度`数量为0的节点，因此原图中的节点，只要是从该节点出发的所有路径，最终达到的都是终端节点，那么这个节点就是`安全节点`。
+
+1. 三色标记法：这里为每个节点设置三种状态；
+    - `0`表示其未被访问
+    - `1`表示其正在被访问的过程中，未完全结束（访问每个节点的时候，会递归访问其指向的其他节点，如果相邻接点在环中，那么当前节点存在于环）
+    - `2`表示完整访问结束之后，当前节点不是环中的节点，而是一个正常的节点
+
+```java
+/**
+* 三色标记法，定义三个状态：0 = 未访问、1 = 访问中，无法访问完成（这里表现为在环中，无法正确结束对其的访问）、2 = 访问完成，即访问了其所有关联的节点之后，下一级节点未返回false
+*/
+public List<Integer> eventualSafeNodes(int[][] graph) {
+    int n = graph.length;
+    List<Integer> ans = new ArrayList<>();
+    int[] status = new int[n];
+    for (int u = 0; u < n; u++) {
+        if (safe(u, graph, status)) {
+            ans.add(u);
+        }
+    }
+    return ans;
+}
+
+private boolean safe(int u, int[][] graph, int[] status) {
+    if (status[u] > 0) return status[u] == 2;
+    status[u] = 1;
+    for (int v : graph[u]) {
+        if (!safe(v, graph, status)) {
+            return false;
+        }
+    }
+    status[u] = 2;
+    return true;
+}
+```
+
+
+2. 反向建图拓扑排序
+```java
+/**
+* 反图拓扑排序法
+*/
+public List<Integer> eventualSafeNodes(int[][] graph) {
+idx = 0;
+int n = graph.length;
+int[] in = new int[n];
+Arrays.fill(h,-1);
+for (int u = 0; u < n; u++) {
+    for (int v : graph[u]) {
+        add(v, u);
+        in[u]++;
+    }
+}
+
+// 拓扑排序
+Deque<Integer> deque = new ArrayDeque<>();
+for (int i = 0; i < n; i++) {
+    if (in[i] == 0) deque.addLast(i);
+}
+
+List<Integer> ans = new ArrayList<>();
+while (!deque.isEmpty()) {
+    int size = deque.size();
+    int u = deque.removeFirst();
+    ans.add(u);
+    for (int nextIdx = h[u]; nextIdx != -1; nextIdx = ne[nextIdx]) {
+        int v = e[nextIdx];
+        in[v]--;
+        if (in[v] == 0) {
+            deque.addLast(v);
+        }
+    }
+}
+ans.sort(Comparator.naturalOrder());
+return ans;
+}
+```
