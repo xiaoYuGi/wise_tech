@@ -192,37 +192,37 @@ private boolean safe(int u, int[][] graph, int[] status) {
 * 反图拓扑排序法
 */
 public List<Integer> eventualSafeNodes(int[][] graph) {
-idx = 0;
-int n = graph.length;
-int[] in = new int[n];
-Arrays.fill(h,-1);
-for (int u = 0; u < n; u++) {
-    for (int v : graph[u]) {
-        add(v, u);
-        in[u]++;
-    }
-}
-
-// 拓扑排序
-Deque<Integer> deque = new ArrayDeque<>();
-for (int i = 0; i < n; i++) {
-    if (in[i] == 0) deque.addLast(i);
-}
-
-List<Integer> ans = new ArrayList<>();
-while (!deque.isEmpty()) {
-    int size = deque.size();
-    int u = deque.removeFirst();
-    ans.add(u);
-    for (int nextIdx = h[u]; nextIdx != -1; nextIdx = ne[nextIdx]) {
-        int v = e[nextIdx];
-        in[v]--;
-        if (in[v] == 0) {
-            deque.addLast(v);
+    idx = 0;
+    int n = graph.length;
+    int[] in = new int[n];
+    Arrays.fill(h,-1);
+    for (int u = 0; u < n; u++) {
+        for (int v : graph[u]) {
+            add(v, u);
+            in[u]++;
         }
     }
-}
-ans.sort(Comparator.naturalOrder());
-return ans;
+
+    // 拓扑排序
+    Deque<Integer> deque = new ArrayDeque<>();
+    for (int i = 0; i < n; i++) {
+        if (in[i] == 0) deque.addLast(i);
+    }
+
+    List<Integer> ans = new ArrayList<>();
+    while (!deque.isEmpty()) {
+        int size = deque.size();
+        int u = deque.removeFirst();
+        ans.add(u);
+        for (int nextIdx = h[u]; nextIdx != -1; nextIdx = ne[nextIdx]) {
+            int v = e[nextIdx];
+            in[v]--;
+            if (in[v] == 0) {
+                deque.addLast(v);
+            }
+        }
+    }
+    ans.sort(Comparator.naturalOrder());
+    return ans;
 }
 ```
